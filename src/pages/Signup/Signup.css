@@ -1,0 +1,41 @@
+.signup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.signup-full-width {
+  grid-column: span 2;
+}
+
+.signup-footer {
+  text-align: center;
+  margin-top: 1rem;
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.signup-login-link {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-weight: 600;
+  text-decoration: underline;
+  margin-left: 0.25rem;
+  transition: color var(--transition-fast);
+}
+
+.signup-login-link:hover {
+  color: var(--primary-hover);
+}
+
+/* Adjustments on mobile screens to stack fields in 1 column */
+@media (max-width: 640px) {
+  .signup-grid {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+  
+  .signup-full-width {
+    grid-column: span 1;
+  }
+}

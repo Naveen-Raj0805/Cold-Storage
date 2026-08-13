@@ -1,0 +1,67 @@
+.input-group {
+  position: relative;
+  margin-bottom: 1.25rem;
+  width: 100%;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+  outline: none;
+}
+
+.input-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.input-label {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-light);
+  font-size: 0.875rem;
+  transition: all var(--transition-speed) var(--transition-bezier);
+  pointer-events: none;
+  background-color: var(--surface);
+  padding: 0 0.25rem;
+}
+
+/* Floating Label Behavior */
+.input-group.floating .input-label {
+  /* Default placeholder hidden state allows input to look clean */
+}
+
+.input-group.floating.has-value .input-label,
+.input-group.floating.is-focused .input-label {
+  top: 0;
+  font-size: 0.75rem;
+  color: var(--primary-hover);
+  font-weight: 500;
+}
+
+.input-group.floating.has-value .input-field:not(:focus) + .input-label {
+  color: var(--text-muted);
+}
+
+.input-error-msg {
+  font-size: 0.75rem;
+  color: var(--danger);
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.input-field.has-error {
+  border-color: var(--danger);
+}
+
+.input-field.has-error:focus {
+  box-shadow: 0 0 0 3px var(--danger-light);
+}

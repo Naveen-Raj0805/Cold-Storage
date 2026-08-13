@@ -1,0 +1,108 @@
+.notification-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background-color: var(--surface);
+  transition: background-color var(--transition-speed);
+  position: relative;
+  border-radius: var(--radius-md);
+}
+
+.notification-item:hover {
+  background-color: #f8fafc;
+}
+
+.notification-item.unread {
+  background-color: var(--primary-light);
+}
+
+.notification-item.unread:hover {
+  background-color: #e6fbf2;
+}
+
+.notification-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.notification-icon-wrapper.success {
+  background-color: var(--success-light);
+  color: var(--success);
+}
+.notification-icon-wrapper.critical {
+  background-color: var(--danger-light);
+  color: var(--danger);
+}
+.notification-icon-wrapper.warning {
+  background-color: var(--warning-light);
+  color: var(--warning);
+}
+.notification-icon-wrapper.info {
+  background-color: var(--info-light);
+  color: var(--info);
+}
+
+.notification-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.notification-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.notification-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.notification-time {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  white-space: nowrap;
+}
+
+.notification-message {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.notification-unread-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background-color: var(--primary);
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
+
+.notification-mark-read-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-speed);
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}
+
+.notification-mark-read-btn:hover {
+  background-color: var(--primary-light);
+}

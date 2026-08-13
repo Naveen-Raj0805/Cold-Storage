@@ -1,0 +1,43 @@
+.manager-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.manager-dashboard-grid-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.manager-dashboard-section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.manager-pending-bookings-card {
+  background-color: var(--surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .manager-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .manager-dashboard-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  
+  .manager-dashboard-grid-row {
+    grid-template-columns: 2fr 1fr;
+  }
+}
