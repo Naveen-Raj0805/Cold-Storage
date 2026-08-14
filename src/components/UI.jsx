@@ -68,9 +68,16 @@ const useCountUp = (targetValue, duration = 1000) => {
 };
 
 // Stat Card Component
-export const StatCard = ({ icon: Icon, title, value, desc, trend, statusColor, index = 0 }) => {
+export const StatCard = ({ icon, title, value, desc, trend, statusColor, index = 0 }) => {
   const animatedValue = useCountUp(value);
   const shouldReduceMotion = useReducedMotion();
+
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (React.isValidElement(icon)) return icon;
+    const IconComponent = icon;
+    return <IconComponent size={20} />;
+  };
 
   return (
     <motion.div 
@@ -86,12 +93,12 @@ export const StatCard = ({ icon: Icon, title, value, desc, trend, statusColor, i
     >
       <div className="stat-card-header">
         <span className="stat-card-title">{title}</span>
-        {Icon && (
+        {icon && (
           <div className="stat-card-icon" style={{ 
             backgroundColor: statusColor ? `var(--status-${statusColor}-bg)` : 'var(--primary-light)',
             color: statusColor ? `var(--status-${statusColor})` : 'var(--primary-color)'
           }}>
-            <Icon size={20} />
+            {renderIcon()}
           </div>
         )}
       </div>
@@ -120,13 +127,14 @@ export const StatCard = ({ icon: Icon, title, value, desc, trend, statusColor, i
 };
 
 // Form Input (Floating Label)
-export const FormInput = ({ label, id, name, type = 'text', value, onChange, required = false, placeholder = ' ', error }) => {
+export const FormInput = ({ label, id, name, type = 'text', value, onChange, required = false, placeholder = '', error, onFocus, onBlur }) => {
   const isPasswordType = type === 'password';
   const [showPassword, setShowPassword] = useState(false);
   const [isToggleHovered, setIsToggleHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
   const inputType = isPasswordType ? (showPassword ? 'text' : 'password') : type;
-  const isFloating = (value !== undefined && value !== null && String(value).trim() !== '') || (placeholder && placeholder.trim() !== '');
+  const isFloating = isFocused || (value !== undefined && value !== null && String(value).trim() !== '');
 
   return (
     <div className="form-group">
@@ -136,9 +144,11 @@ export const FormInput = ({ label, id, name, type = 'text', value, onChange, req
           id={id}
           name={name}
           className="form-input"
-          placeholder={placeholder || ' '}
+          placeholder={placeholder || undefined}
           value={value}
           onChange={onChange}
+          onFocus={(e) => { setIsFocused(true); onFocus?.(e); }}
+          onBlur={(e) => { setIsFocused(false); onBlur?.(e); }}
           required={required}
           style={{ paddingRight: isPasswordType ? '2.5rem' : undefined }}
         />

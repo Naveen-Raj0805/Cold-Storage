@@ -1418,24 +1418,29 @@ button, input, select, textarea {
   gap: 1.25rem;
 }
 
-.login-input {
+.login-card .form-input {
   background-color: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border-radius: 8px;
 }
 
-.login-input:focus {
-  border-color: var(--primary-color);
+.login-card .form-input:focus {
+  border-color: #10b981;
   background-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
 
-.login-label {
+.login-card .form-label {
   color: #94a3b8;
 }
 
-.login-input:focus ~ .login-label,
-.login-input:not(:placeholder-shown) ~ .login-label {
-  color: var(--primary-color);
+.login-card .form-label.is-floating {
+  color: #cbd5e1;
+}
+
+.login-card .form-input:focus ~ .form-label {
+  color: #10b981;
 }
 
 /* Toast Notifications */

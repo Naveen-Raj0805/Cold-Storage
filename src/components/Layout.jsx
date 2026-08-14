@@ -4,7 +4,7 @@ import { AppContext } from '../context/AppContext';
 import { 
   LayoutDashboard, Warehouse, Users, Settings, BarChart3, 
   ShieldAlert, FileText, Package, Bell, LogOut, Sun, Moon, 
-  Menu, X, ChevronDown, User, Calendar 
+  Menu, X, ChevronDown, User, Calendar, Sparkles 
 } from 'lucide-react';
 import { Avatar } from './UI';
 
@@ -55,6 +55,8 @@ export const Layout = ({ children }) => {
     ],
     manager: [
       { name: t('dashboard'), path: '/manager/dashboard', icon: LayoutDashboard },
+      { name: 'Approvals', path: '/manager/approvals', icon: Calendar },
+      { name: 'AI Quality Inspector', path: '/manager/quality-inspector', icon: Sparkles },
       { name: t('storageUnits'), path: '/manager/monitoring', icon: Warehouse },
       { name: t('products'), path: '/manager/products', icon: Package },
       { name: t('users'), path: '/manager/users', icon: Users },

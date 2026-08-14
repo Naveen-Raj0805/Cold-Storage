@@ -36,13 +36,10 @@ public class StorageUnitController {
     }
 
     @GetMapping("/{id}/chambers")
-    public ResponseEntity<List<Chamber>> getChambersByStorageId(@PathVariable Long id, @RequestParam(required = false) String status) {
-        List<Chamber> chambers;
-        if (status != null && !status.trim().isEmpty()) {
-            chambers = chamberRepository.findByStorageUnitIdAndStatusIgnoreCase(id, status.trim());
-        } else {
-            chambers = chamberRepository.findByStorageUnitId(id);
-        }
+    public ResponseEntity<List<Chamber>> getChambersByStorageId(@PathVariable Long id, 
+                                                                @RequestParam(required = false) String status,
+                                                                @RequestParam(required = false) Long farmerId) {
+        List<Chamber> chambers = storageUnitService.getChambersByStorageId(id, status, farmerId);
         return ResponseEntity.ok(chambers);
     }
 

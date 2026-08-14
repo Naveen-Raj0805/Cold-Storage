@@ -7,6 +7,7 @@ import com.agrifreeze.entity.Product;
 import com.agrifreeze.entity.StorageBooking;
 import com.agrifreeze.entity.StorageUnit;
 import com.agrifreeze.exception.BadRequestException;
+import com.agrifreeze.exception.ForbiddenException;
 import com.agrifreeze.exception.ResourceNotFoundException;
 import com.agrifreeze.exception.UnauthorizedException;
 import com.agrifreeze.repository.ChamberRepository;
@@ -75,16 +76,18 @@ public class ProductService {
 
         // Verify Approved Storage Booking Allocation
         String fidStr = String.valueOf(request.getFarmerId());
-        List<StorageBooking> farmerApprovedBookings = bookingRepository.findByFarmerIdAndStatusIgnoreCase(fidStr, "Approved");
-        if (farmerApprovedBookings.isEmpty()) {
-            // Also check status "APPROVED" uppercase or seed bookings
-            farmerApprovedBookings = bookingRepository.findByFarmerId(fidStr).stream()
-                    .filter(b -> "Approved".equalsIgnoreCase(b.getStatus()) || "APPROVED".equalsIgnoreCase(b.getStatus()))
-                    .collect(Collectors.toList());
-        }
+        String sidStr = String.valueOf(request.getStorageId());
 
-        if (farmerApprovedBookings.isEmpty() && request.getFarmerId() != 3L) {
-            throw new UnauthorizedException("Farmer ID " + request.getFarmerId() + " does not have an approved storage allocation.");
+        List<StorageBooking> farmerApprovedBookings = bookingRepository.findByFarmerId(fidStr).stream()
+                .filter(b -> "Approved".equalsIgnoreCase(b.getStatus()) || "APPROVED".equalsIgnoreCase(b.getStatus()))
+                .collect(Collectors.toList());
+
+        boolean hasApprovedBookingForTarget = farmerApprovedBookings.stream()
+                .anyMatch(b -> sidStr.equalsIgnoreCase(b.getStorageId()) 
+                            || (request.getStorageName() != null && request.getStorageName().equalsIgnoreCase(b.getStorageName())));
+
+        if (!hasApprovedBookingForTarget) {
+            throw new ForbiddenException("Access denied: Farmer ID " + request.getFarmerId() + " does not have an approved storage allocation for facility/chamber.");
         }
 
         StorageUnit unit = getStorageUnit(request.getStorageId());

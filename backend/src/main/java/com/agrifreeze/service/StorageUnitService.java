@@ -3,13 +3,16 @@ package com.agrifreeze.service;
 import com.agrifreeze.dto.StorageUnitRequest;
 import com.agrifreeze.dto.StorageUnitResponse;
 import com.agrifreeze.entity.StorageUnit;
+import com.agrifreeze.entity.StorageBooking;
 import com.agrifreeze.exception.BadRequestException;
 import com.agrifreeze.exception.DuplicateResourceException;
+import com.agrifreeze.exception.ForbiddenException;
 import com.agrifreeze.exception.ResourceNotFoundException;
 import com.agrifreeze.entity.Chamber;
 import com.agrifreeze.entity.AppUser;
 import com.agrifreeze.repository.AppUserRepository;
 import com.agrifreeze.repository.ChamberRepository;
+import com.agrifreeze.repository.StorageBookingRepository;
 import com.agrifreeze.repository.StorageUnitRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +27,18 @@ public class StorageUnitService {
     private final StorageUnitRepository storageUnitRepository;
     private final ChamberRepository chamberRepository;
     private final AppUserRepository userRepository;
+    private final StorageBookingRepository bookingRepository;
     private final EmailService emailService;
 
     public StorageUnitService(StorageUnitRepository storageUnitRepository,
                               ChamberRepository chamberRepository,
                               AppUserRepository userRepository,
+                              StorageBookingRepository bookingRepository,
                               EmailService emailService) {
         this.storageUnitRepository = storageUnitRepository;
         this.chamberRepository = chamberRepository;
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
         this.emailService = emailService;
     }
 
@@ -224,6 +230,32 @@ public class StorageUnitService {
             chamberRepository.deleteAll(chambers);
         }
         storageUnitRepository.delete(unit);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Chamber> getChambersByStorageId(Long storageId, String status, Long farmerId) {
+        if (farmerId != null) {
+            String fidStr = String.valueOf(farmerId);
+            String sidStr = String.valueOf(storageId);
+
+            List<StorageBooking> farmerApprovedBookings = bookingRepository.findByFarmerId(fidStr).stream()
+                    .filter(b -> "Approved".equalsIgnoreCase(b.getStatus()) || "APPROVED".equalsIgnoreCase(b.getStatus()))
+                    .collect(Collectors.toList());
+
+            boolean hasApproved = farmerApprovedBookings.stream()
+                    .anyMatch(b -> sidStr.equalsIgnoreCase(b.getStorageId())
+                                || (b.getStorageName() != null && storageUnitRepository.findById(storageId).map(s -> s.getName().equalsIgnoreCase(b.getStorageName())).orElse(false)));
+
+            if (!hasApproved) {
+                throw new ForbiddenException("Access denied: Farmer ID " + farmerId + " does not have an approved storage allocation for facility " + storageId);
+            }
+        }
+
+        if (status != null && !status.trim().isEmpty()) {
+            return chamberRepository.findByStorageUnitIdAndStatusIgnoreCase(storageId, status.trim());
+        } else {
+            return chamberRepository.findByStorageUnitId(storageId);
+        }
     }
 
     private StorageUnitResponse convertToResponse(StorageUnit unit) {

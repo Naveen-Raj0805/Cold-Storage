@@ -20,6 +20,9 @@ public class AiSettings {
     @Column(name = "model_version", length = 100)
     private String modelVersion = "gemini-2.5-flash";
 
+    @Column(name = "api_key", columnDefinition = "TEXT")
+    private String apiKey;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt = LocalDateTime.now();
 
@@ -43,6 +46,9 @@ public class AiSettings {
 
     public String getModelVersion() { return modelVersion; }
     public void setModelVersion(String modelVersion) { this.modelVersion = modelVersion; }
+
+    public String getApiKey() { return apiKey; }
+    public void setApiKey(String apiKey) { this.apiKey = apiKey; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }

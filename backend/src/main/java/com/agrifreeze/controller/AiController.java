@@ -29,8 +29,9 @@ public class AiController {
         String masterPrompt = (String) body.get("masterPrompt");
         Integer riskThreshold = body.get("riskThreshold") != null ? Integer.parseInt(body.get("riskThreshold").toString()) : null;
         String modelVersion = (String) body.get("modelVersion");
+        String apiKey = (String) body.get("apiKey");
 
-        AiSettings updated = aiService.updateSettings(masterPrompt, riskThreshold, modelVersion);
+        AiSettings updated = aiService.updateSettings(masterPrompt, riskThreshold, modelVersion, apiKey);
         return ResponseEntity.ok(updated);
     }
 

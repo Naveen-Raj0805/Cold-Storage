@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppContext } from '../context/AppContext';
-import { Warehouse, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { Warehouse, ShieldCheck, ArrowLeft, Building2, Sprout, Zap } from 'lucide-react';
 import { FormInput } from '../components/UI';
 import { motion } from 'framer-motion';
 import { login as loginApi } from '../services/api';
@@ -9,6 +9,7 @@ import { login as loginApi } from '../services/api';
 export const Login = () => {
   const { login, currentUser } = useContext(AppContext);
   const navigate = useNavigate();
+  const [activeRoleTab, setActiveRoleTab] = useState('manager');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [validationError, setValidationError] = useState('');
@@ -20,47 +21,56 @@ export const Login = () => {
     }
   }, [currentUser, navigate]);
 
+  const handleRoleTabChange = (role) => {
+    setActiveRoleTab(role);
+    setValidationError('');
+    setEmail('');
+    setPassword('');
+  };
+
+  const handleQuickFillDemo = () => {
+    setValidationError('');
+    if (activeRoleTab === 'manager') {
+      setEmail('717824I142@gmail.com');
+      setPassword('naveen123');
+    } else if (activeRoleTab === 'farmer') {
+      setEmail('farmer@agrifreeze.com');
+      setPassword('password');
+    } else if (activeRoleTab === 'admin') {
+      setEmail('admin@agrifreeze.com');
+      setPassword('password');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setValidationError('');
 
     if (!email) {
-      setValidationError('Please enter a valid email address.');
+      setValidationError('Please enter your account email address.');
       return;
     }
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Guaranteed 100% Instant Login for standard roles (Admin, Manager, Farmer)
-    if (cleanEmail === 'admin@gmail.com' || cleanEmail === 'admin') {
-      login('admin');
-      return;
-    }
-    if (cleanEmail === 'manager@gmail.com' || cleanEmail === 'manager') {
-      login('manager');
-      return;
-    }
-    if (cleanEmail === 'farmer@gmail.com' || cleanEmail === 'farmer') {
-      login('farmer');
-      return;
-    }
-
-    // Dynamic Backend API authentication for newly registered accounts
+    // Authenticate through backend REST API (POST /api/auth/login)
     try {
-      const response = await loginApi(cleanEmail, password);
+      const response = await loginApi(cleanEmail, password || 'password');
       
+      const targetRole = response.role ? response.role.toLowerCase() : activeRoleTab;
       const userDetails = {
         id: response.id,
         name: response.fullName,
-        role: response.role ? response.role.toLowerCase() : 'farmer',
+        role: targetRole,
         email: response.email,
         phone: response.phone,
-        avatar: response.fullName ? response.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'U',
-        ...(response.role && response.role.toLowerCase() === 'farmer' ? { bookedStorage: 'AgriFreeze Coldroom Alpha' } : {}),
-        ...(response.role && response.role.toLowerCase() === 'manager' ? { assignedStorage: 'AgriFreeze Coldroom Alpha' } : {})
+        avatar: response.fullName ? response.fullName.split(' ').map(n => n[0]).join('').toUpperCase() : 'M',
+        ...(targetRole === 'farmer' ? { bookedStorage: 'AgriFreeze Coldroom Alpha' } : {}),
+        ...(targetRole === 'manager' ? { assignedStorage: 'AgriFreeze North Hub' } : {})
       };
 
       login(userDetails);
+      navigate(`/${targetRole}/dashboard`, { replace: true });
     } catch (err) {
       setValidationError(err.message || 'Invalid email or password.');
     }
@@ -82,8 +92,92 @@ export const Login = () => {
             <span className="login-logo-icon"><Warehouse size={28} strokeWidth={2.5} /></span>
             <span>AgriFreeze</span>
           </div>
-          <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 600 }}>Enterprise Cold Chain Portal</h2>
-          <span className="login-subtitle">Secure agricultural warehouse dashboard</span>
+          <h2 style={{ color: 'white', fontSize: '1.25rem', fontWeight: 600 }}>
+            {activeRoleTab === 'manager' ? 'Storage Manager Portal' : activeRoleTab === 'admin' ? 'System Administrator Portal' : 'Farmer Cold Storage Portal'}
+          </h2>
+          <span className="login-subtitle">
+            {activeRoleTab === 'manager' ? 'Enterprise Cold Storage Operations & Monitoring' : activeRoleTab === 'admin' ? 'Platform Governance & Facility Administration' : 'Secure Agricultural Warehouse & Capacity Booking'}
+          </span>
+        </div>
+
+        {/* Role Selector Tabs */}
+        <div style={{ 
+          display: 'flex', 
+          backgroundColor: 'rgba(255, 255, 255, 0.05)', 
+          padding: '0.25rem', 
+          borderRadius: 'var(--radius-md)', 
+          marginBottom: '1rem', 
+          border: '1px solid rgba(255, 255, 255, 0.1)' 
+        }}>
+          <button
+            type="button"
+            onClick={() => handleRoleTabChange('manager')}
+            style={{
+              flex: 1,
+              padding: '0.45rem 0.5rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
+              backgroundColor: activeRoleTab === 'manager' ? 'var(--primary-color)' : 'transparent',
+              color: activeRoleTab === 'manager' ? 'white' : '#94a3b8',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Building2 size={15} />
+            <span>Storage Manager</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRoleTabChange('farmer')}
+            style={{
+              flex: 1,
+              padding: '0.45rem 0.5rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
+              backgroundColor: activeRoleTab === 'farmer' ? 'var(--primary-color)' : 'transparent',
+              color: activeRoleTab === 'farmer' ? 'white' : '#94a3b8',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Sprout size={15} />
+            <span>Farmer</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRoleTabChange('admin')}
+            style={{
+              flex: 1,
+              padding: '0.45rem 0.5rem',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              borderRadius: 'var(--radius-sm)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.35rem',
+              backgroundColor: activeRoleTab === 'admin' ? 'var(--primary-color)' : 'transparent',
+              color: activeRoleTab === 'admin' ? 'white' : '#94a3b8',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <ShieldCheck size={15} />
+            <span>Admin</span>
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
@@ -133,19 +227,50 @@ export const Login = () => {
             whileTap={{ scale: 0.99 }}
           >
             <ShieldCheck size={18} />
-            <span>Sign In to Dashboard</span>
+            <span>Sign In to {activeRoleTab === 'manager' ? 'Manager Dashboard' : activeRoleTab === 'admin' ? 'Admin Console' : 'Farmer Dashboard'}</span>
           </motion.button>
         </form>
 
-        <div style={{ textAlign: 'center', fontSize: '0.875rem', color: '#94a3b8', marginTop: '-0.5rem' }}>
-          Don't have an account?{' '}
-          <span 
-            onClick={() => navigate('/signup')} 
-            style={{ color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}
+        {/* Quick Demo Fill Button */}
+        <div style={{ textAlign: 'center', marginTop: '-0.5rem' }}>
+          <button
+            type="button"
+            onClick={handleQuickFillDemo}
+            style={{
+              background: 'rgba(255, 255, 255, 0.04)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: 'var(--radius-sm)',
+              color: '#94a3b8',
+              fontSize: '0.75rem',
+              padding: '0.35rem 0.75rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.35rem',
+              transition: 'all 0.2s ease'
+            }}
           >
-            Sign Up
-          </span>
+            <Zap size={13} style={{ color: '#f59e0b' }} />
+            <span>Auto-fill Demo Credentials ({activeRoleTab === 'manager' ? '717824I142@gmail.com' : activeRoleTab === 'admin' ? 'admin@agrifreeze.com' : 'farmer@agrifreeze.com'})</span>
+          </button>
         </div>
+
+        {/* Create Account / Signup section - Only shown for public Farmer login, hidden for Manager & Admin */}
+        {activeRoleTab === 'farmer' ? (
+          <div style={{ textAlign: 'center', fontSize: '0.875rem', color: '#94a3b8', marginTop: '-0.5rem' }}>
+            Don't have an account?{' '}
+            <span 
+              onClick={() => navigate('/signup')} 
+              style={{ color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 600, textDecoration: 'underline' }}
+            >
+              Sign Up
+            </span>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', fontSize: '0.8125rem', color: '#64748b', marginTop: '-0.25rem' }}>
+            🔒 Enterprise Account — Access Granted by System Administrator
+          </div>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'center', fontSize: '0.875rem', marginTop: '-0.5rem' }}>
           <Link to="/" style={{ color: '#94a3b8', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.25rem', fontWeight: 500 }}>

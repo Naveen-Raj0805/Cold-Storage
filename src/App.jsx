@@ -1,7 +1,9 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, AppContext } from './context/AppContext';
 import { Layout } from './components/Layout';
+import { SplashScreen } from './components/SplashScreen';
+import { AnimatePresence } from 'framer-motion';
 import { LandingPage } from './pages/LandingPage';
 import { Login } from './pages/Login';
 import { ForgotPassword } from './pages/ForgotPassword/ForgotPassword';
@@ -24,6 +26,8 @@ import { ProductManagement } from './pages/manager/ProductManagement';
 import { ManagerUsers } from './pages/manager/ManagerUsers';
 import { AlertManagement } from './pages/manager/AlertManagement';
 import { ManagerReports } from './pages/manager/ManagerReports';
+import { QualityInspector } from './pages/manager/QualityInspector';
+import { ApprovalsManagement } from './pages/manager/ApprovalsManagement';
 
 // Farmer Pages
 import { FarmerDashboard } from './pages/farmer/FarmerDashboard';
@@ -82,6 +86,8 @@ function MainApp() {
         <Route path="/manager/users" element={<ProtectedRoute allowedRoles={['manager']}><ManagerUsers /></ProtectedRoute>} />
         <Route path="/manager/alerts" element={<ProtectedRoute allowedRoles={['manager']}><AlertManagement /></ProtectedRoute>} />
         <Route path="/manager/reports" element={<ProtectedRoute allowedRoles={['manager']}><ManagerReports /></ProtectedRoute>} />
+        <Route path="/manager/quality-inspector" element={<ProtectedRoute allowedRoles={['manager']}><QualityInspector /></ProtectedRoute>} />
+        <Route path="/manager/approvals" element={<ProtectedRoute allowedRoles={['manager']}><ApprovalsManagement /></ProtectedRoute>} />
         <Route path="/manager/profile" element={<ProtectedRoute allowedRoles={['manager']}><Profile /></ProtectedRoute>} />
 
         {/* Farmer Routes */}
@@ -101,8 +107,20 @@ function MainApp() {
 }
 
 function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <AppProvider>
+      <AnimatePresence mode="wait">
+        {showSplash && <SplashScreen key="splash-screen" />}
+      </AnimatePresence>
       <MainApp />
     </AppProvider>
   );

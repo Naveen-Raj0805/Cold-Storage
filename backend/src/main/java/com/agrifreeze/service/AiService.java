@@ -31,7 +31,7 @@ public class AiService {
         });
     }
 
-    public AiSettings updateSettings(String masterPrompt, Integer riskThreshold, String modelVersion) {
+    public AiSettings updateSettings(String masterPrompt, Integer riskThreshold, String modelVersion, String apiKey) {
         AiSettings settings = getSettings();
         if (masterPrompt != null && !masterPrompt.trim().isEmpty()) {
             settings.setMasterPrompt(masterPrompt.trim());
@@ -41,6 +41,9 @@ public class AiService {
         }
         if (modelVersion != null && !modelVersion.trim().isEmpty()) {
             settings.setModelVersion(modelVersion.trim());
+        }
+        if (apiKey != null && !apiKey.trim().isEmpty()) {
+            settings.setApiKey(apiKey.trim());
         }
         settings.setUpdatedAt(LocalDateTime.now());
         return aiSettingsRepository.save(settings);

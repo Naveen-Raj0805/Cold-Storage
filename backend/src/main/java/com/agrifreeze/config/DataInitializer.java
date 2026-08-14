@@ -41,6 +41,11 @@ public class DataInitializer implements CommandLineRunner {
         if (userRepository.count() == 0) {
             seedUsers();
         }
+        if (userRepository.findByEmail("717824i142@gmail.com").isEmpty() && userRepository.findByEmail("717824I142@gmail.com").isEmpty()) {
+            AppUser naveenManager = new AppUser(null, "Naveen Manager", "717824I142@gmail.com",
+                    passwordEncoder.encode("naveen123"), "+1 (555) 043-9999", "MANAGER", "ACTIVE", null);
+            userRepository.save(naveenManager);
+        }
         if (storageUnitRepository.count() == 0) {
             seedStorageUnitsAndChambers();
         } else if (chamberRepository.count() == 0) {
@@ -76,10 +81,13 @@ public class DataInitializer implements CommandLineRunner {
         AppUser manager = new AppUser(null, "Robert Vance", "manager@agrifreeze.com", passwordEncoder.encode("password"),
                 "+1 (555) 043-9821", "MANAGER", "ACTIVE", null);
 
+        AppUser naveenManager = new AppUser(null, "Naveen Manager", "717824I142@gmail.com", passwordEncoder.encode("naveen123"),
+                "+1 (555) 043-9999", "MANAGER", "ACTIVE", null);
+
         AppUser farmer = new AppUser(null, "Sanjay Patel", "farmer@agrifreeze.com", passwordEncoder.encode("password"),
                 "+1 (555) 089-4512", "FARMER", "ACTIVE", null);
 
-        userRepository.saveAll(List.of(admin, manager, farmer));
+        userRepository.saveAll(List.of(admin, manager, naveenManager, farmer));
     }
 
     private void seedStorageUnitsAndChambers() {

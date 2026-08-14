@@ -12,6 +12,7 @@ export const AdminSettings = () => {
   const [masterPrompt, setMasterPrompt] = useState('');
   const [riskThreshold, setRiskThreshold] = useState(70);
   const [modelVersion, setModelVersion] = useState('gemini-2.5-flash');
+  const [apiKey, setApiKey] = useState('');
   const [isSavingAi, setIsSavingAi] = useState(false);
 
   // Load AI Settings on mount
@@ -23,6 +24,7 @@ export const AdminSettings = () => {
           setMasterPrompt(config.masterPrompt || '');
           setRiskThreshold(config.riskThreshold || 70);
           setModelVersion(config.modelVersion || 'gemini-2.5-flash');
+          setApiKey(config.apiKey || '');
         }
       } catch (err) {
         console.error(err);
@@ -38,9 +40,10 @@ export const AdminSettings = () => {
       await updateAiSettings({
         masterPrompt,
         riskThreshold,
-        modelVersion
+        modelVersion,
+        apiKey
       });
-      triggerToast('AI Governance Updated', 'Master prompt template, alert risk thresholds, and Gemini model version updated live in MySQL.', 'success');
+      triggerToast('AI Governance Updated', 'Gemini API key, master prompt template, alert risk thresholds, and model version updated live.', 'success');
     } catch (err) {
       triggerToast('Save Failed', 'Could not update AI governance settings.', 'danger');
     } finally {
@@ -132,6 +135,20 @@ export const AdminSettings = () => {
                 <Sparkles size={18} style={{ color: 'var(--primary-color)' }} />
                 <span>AI Governance & Prompt Tuning Console</span>
               </h3>
+
+              {/* Google Gemini API Key Input */}
+              <div>
+                <FormInput
+                  label="Google Gemini API Key (AIzaSy...)"
+                  id="gemini-api-key"
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                />
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '-0.5rem', display: 'block' }}>
+                  Enter your Google Gemini API key here or set <code style={{ color: 'var(--primary-color)' }}>GEMINI_API_KEY</code> environment variable in application.properties / .env file.
+                </span>
+              </div>
 
               {/* Prompt Tuning Console */}
               <div>

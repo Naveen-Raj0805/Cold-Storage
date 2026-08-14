@@ -70,9 +70,15 @@ export const Signup = () => {
         });
 
         setAvailableChambers(filtered);
+        if (filtered.length === 0) {
+          setFormData(prev => ({ ...prev, chamberId: 'WAITLIST' }));
+        } else {
+          setFormData(prev => ({ ...prev, chamberId: '' }));
+        }
       } catch (err) {
         console.warn("Failed to fetch available chambers", err);
         setAvailableChambers([]);
+        setFormData(prev => ({ ...prev, chamberId: 'WAITLIST' }));
       } finally {
         setIsLoadingChambers(false);
       }
@@ -126,7 +132,7 @@ export const Signup = () => {
     }
 
     if (!formData.storageId) newErrors.storageId = 'Please select a Cold Storage facility.';
-    if (!formData.chamberId) newErrors.chamberId = 'Please select an available Chamber.';
+    if (!formData.chamberId) newErrors.chamberId = 'Please select a chamber or request allocation.';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -150,15 +156,30 @@ export const Signup = () => {
 
       if (formData.storageId && formData.chamberId) {
         const selectedStorage = storagesList.find(s => String(s.id) === String(formData.storageId) || s.name === formData.storageId);
-        const selectedChamber = availableChambers.find(c => String(c.id) === String(formData.chamberId) || c.name === formData.chamberId || c.chamberCode === formData.chamberId);
+        let selectedChamberName = 'General Storage Allocation';
+        let targetChamberId = formData.chamberId;
+
+        if (formData.chamberId === 'WAITLIST') {
+          selectedChamberName = 'Priority Facility Waitlist (Manager Auto-Assign)';
+          targetChamberId = 'WAITLIST';
+        } else if (formData.chamberId === 'AUTO_ASSIGN') {
+          selectedChamberName = 'Manager Auto-Assign (Any Available Chamber)';
+          targetChamberId = 'AUTO';
+        } else {
+          const selectedChamber = availableChambers.find(c => String(c.id) === String(formData.chamberId) || c.name === formData.chamberId || c.chamberCode === formData.chamberId);
+          if (selectedChamber) {
+            selectedChamberName = selectedChamber.name || selectedChamber.chamberCode || 'Chamber 1';
+            targetChamberId = String(selectedChamber.id);
+          }
+        }
 
         const bookingPayload = {
           farmerId: String(userRes?.id || Date.now()),
           farmerName: fullName,
           storageId: String(selectedStorage?.id || formData.storageId),
           storageName: selectedStorage?.name || 'Cold Storage Facility',
-          chamberId: String(selectedChamber?.id || formData.chamberId),
-          chamberName: selectedChamber?.name || selectedChamber?.chamberCode || 'Chamber 1',
+          chamberId: targetChamberId,
+          chamberName: selectedChamberName,
           category: 'General Crops',
           weight: '10 Tons',
           startDate: new Date().toISOString().split('T')[0],
@@ -188,13 +209,18 @@ export const Signup = () => {
     ...storagesList.map(s => ({ label: `${s.name} (${s.location})`, value: String(s.id) }))
   ];
 
-  const chamberOptions = [
-    { label: isLoadingChambers ? 'Loading available chambers...' : '-- Select Available Chamber --', value: '' },
-    ...availableChambers.map(c => ({ 
-      label: `${c.name || c.chamberCode} (Cap: ${c.capacity}T, Status: Available)`, 
-      value: String(c.id) 
-    }))
-  ];
+  const chamberOptions = availableChambers.length === 0
+    ? [
+        { label: '📋 Priority Allocation Waitlist (Manager Auto-Assign)', value: 'WAITLIST' }
+      ]
+    : [
+        { label: isLoadingChambers ? 'Loading available chambers...' : '-- Select Chamber Allocation --', value: '' },
+        { label: '⚡ Any Available Chamber (Manager Auto-Assign)', value: 'AUTO_ASSIGN' },
+        ...availableChambers.map(c => ({ 
+          label: `${c.name || c.chamberCode} (Cap: ${c.capacity}T, Status: Available)`, 
+          value: String(c.id) 
+        }))
+      ];
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -322,7 +348,7 @@ export const Signup = () => {
           {formData.storageId && (
             <motion.div variants={itemVariants} style={{ marginTop: '0.75rem' }}>
               <FormSelect
-                label="Select Available Chamber"
+                label="Select Available Chamber / Allocation Mode"
                 id="signup-chamber"
                 name="chamberId"
                 value={formData.chamberId}
@@ -331,9 +357,38 @@ export const Signup = () => {
                 options={chamberOptions}
                 error={errors.chamberId}
               />
-              {availableChambers.length === 0 && !isLoadingChambers && (
-                <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '0.25rem' }}>
-                  ⚠️ All chambers in this facility are currently booked. Please select another storage facility.
+              
+              {!isLoadingChambers && availableChambers.length === 0 && (
+                <div style={{ 
+                  backgroundColor: 'rgba(59, 130, 246, 0.12)', 
+                  color: '#60a5fa', 
+                  padding: '0.65rem 0.85rem', 
+                  borderRadius: 'var(--radius-md)', 
+                  border: '1px solid rgba(59, 130, 246, 0.3)', 
+                  marginTop: '0.5rem', 
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <span>ℹ️ All specific chambers in this facility are currently booked. Your request will be placed on the Manager's Priority Allocation Waitlist upon registration.</span>
+                </div>
+              )}
+
+              {!isLoadingChambers && availableChambers.length > 0 && (
+                <div style={{ 
+                  backgroundColor: 'rgba(16, 185, 129, 0.12)', 
+                  color: '#34d399', 
+                  padding: '0.5rem 0.85rem', 
+                  borderRadius: 'var(--radius-md)', 
+                  border: '1px solid rgba(16, 185, 129, 0.3)', 
+                  marginTop: '0.4rem', 
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem'
+                }}>
+                  <span>✨ Found <strong>{availableChambers.length} Available Chamber(s)</strong> ready for allocation in this facility.</span>
                 </div>
               )}
             </motion.div>

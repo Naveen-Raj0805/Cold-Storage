@@ -16,6 +16,7 @@ public class AiInspectionDoc {
     private String chamberName;
     private Double temperature;
     private Double humidity;
+    private String doorMetrics;
     private Integer spoilageRiskPercent;
     private Integer predictedShelfLifeDays;
     private String status;
@@ -63,6 +64,9 @@ public class AiInspectionDoc {
 
     public Double getHumidity() { return humidity; }
     public void setHumidity(Double humidity) { this.humidity = humidity; }
+
+    public String getDoorMetrics() { return doorMetrics; }
+    public void setDoorMetrics(String doorMetrics) { this.doorMetrics = doorMetrics; }
 
     public Integer getSpoilageRiskPercent() { return spoilageRiskPercent; }
     public void setSpoilageRiskPercent(Integer spoilageRiskPercent) { this.spoilageRiskPercent = spoilageRiskPercent; }

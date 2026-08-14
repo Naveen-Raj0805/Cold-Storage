@@ -56,12 +56,12 @@ export const StorageBooking = () => {
         if (filtered.length > 0) {
           setSelectedChamberId(String(filtered[0].id));
         } else {
-          setSelectedChamberId('');
+          setSelectedChamberId('WAITLIST');
         }
       } catch (err) {
         console.error("Failed to load chambers for storage booking", err);
         setAvailableChambers([]);
-        setSelectedChamberId('');
+        setSelectedChamberId('WAITLIST');
       } finally {
         setIsLoadingChambers(false);
       }
@@ -85,12 +85,24 @@ export const StorageBooking = () => {
       return;
     }
 
-    if (!selectedChamberId || availableChambers.length === 0) {
-      triggerToast('No Chamber Available', 'Please select an available chamber from the list.', 'danger');
+    if (!selectedChamberId) {
+      triggerToast('No Selection', 'Please select a chamber or request facility allocation.', 'danger');
       return;
     }
 
-    const selectedChamberObj = availableChambers.find(c => String(c.id) === String(selectedChamberId)) || availableChambers[0];
+    let targetChamberId = selectedChamberId;
+    let targetChamberName = 'General Storage Allocation';
+
+    if (selectedChamberId === 'WAITLIST') {
+      targetChamberId = 'WAITLIST';
+      targetChamberName = 'Priority Facility Waitlist (Manager Auto-Assign)';
+    } else {
+      const selectedChamberObj = availableChambers.find(c => String(c.id) === String(selectedChamberId));
+      if (selectedChamberObj) {
+        targetChamberId = selectedChamberObj.id;
+        targetChamberName = selectedChamberObj.name;
+      }
+    }
 
     const rawId = selectedStorage.id;
     const numericStorageId = typeof rawId === 'string' && rawId.startsWith('STR-') ? Number(rawId.replace('STR-', '')) : Number(rawId) || 1;
@@ -100,8 +112,8 @@ export const StorageBooking = () => {
       farmerName: currentUser?.fullName || currentUser?.name || 'Farmer Client',
       storageId: numericStorageId,
       storageName: selectedStorage.name,
-      chamberId: selectedChamberObj ? selectedChamberObj.id : 1,
-      chamberName: selectedChamberObj ? selectedChamberObj.name : 'Chamber 1',
+      chamberId: targetChamberId,
+      chamberName: targetChamberName,
       category: 'Vegetables',
       weight: '125 Tons',
       status: 'Pending'
@@ -114,7 +126,7 @@ export const StorageBooking = () => {
       id: `REQ-${Date.now().toString().slice(-4)}`
     });
     setSuccess(true);
-    triggerToast('Allocation Request Dispatched', `Request sent to Manager for ${selectedChamberObj?.name} in ${selectedStorage?.name}.`, 'success');
+    triggerToast('Allocation Request Dispatched', `Request sent to Manager for ${targetChamberName} in ${selectedStorage?.name}.`, 'success');
   };
 
   return (
@@ -183,16 +195,21 @@ export const StorageBooking = () => {
             {/* Step 2: Select Available Chamber */}
             <div>
               <FormSelect
-                label="Select Available Chamber"
+                label="Select Available Chamber / Allocation Mode"
                 id="booking-chamber"
                 name="chamber"
                 value={selectedChamberId}
                 onChange={(e) => setSelectedChamberId(e.target.value)}
-                disabled={isLoadingChambers || availableChambers.length === 0}
-                options={availableChambers.map(c => ({ 
-                  label: `${c.name} (${c.type || 'Vegetables'} - Available)`, 
-                  value: String(c.id) 
-                }))}
+                disabled={isLoadingChambers}
+                options={availableChambers.length === 0 ? [
+                  { label: '📋 Priority Facility Waitlist (Manager Auto-Assign)', value: 'WAITLIST' }
+                ] : [
+                  { label: '⚡ Any Available Chamber (Manager Auto-Assign)', value: 'AUTO_ASSIGN' },
+                  ...availableChambers.map(c => ({ 
+                    label: `${c.name} (${c.type || 'Vegetables'} - Available)`, 
+                    value: String(c.id) 
+                  }))
+                ]}
                 required
               />
 
@@ -203,9 +220,9 @@ export const StorageBooking = () => {
               )}
 
               {!isLoadingChambers && availableChambers.length === 0 && (
-                <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', color: '#dc2626', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(239, 68, 68, 0.3)', marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <AlertTriangle size={18} />
-                  <span>No available chambers in {selectedStorage?.name}. All chambers are currently booked. Please select another storage facility.</span>
+                <div style={{ backgroundColor: 'rgba(59, 130, 246, 0.12)', color: '#2563eb', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(59, 130, 246, 0.3)', marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Building2 size={18} />
+                  <span>All specific chambers in <strong>{selectedStorage?.name}</strong> are currently booked. Submitting this request will add your allocation request to the Manager's Priority Allocation Queue.</span>
                 </div>
               )}
 
@@ -222,9 +239,9 @@ export const StorageBooking = () => {
               <button 
                 type="submit" 
                 className="btn btn-primary"
-                disabled={isLoadingChambers || availableChambers.length === 0}
+                disabled={isLoadingChambers}
               >
-                Book Storage Space
+                Request Storage Space Allocation
               </button>
               <button type="button" className="btn btn-secondary" onClick={handleReset}>
                 Reset Form

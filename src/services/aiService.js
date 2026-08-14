@@ -44,7 +44,7 @@ export const updateAiSettings = async (settingsData) => {
 
 export const submitDigitalInspection = async (inspectionData) => {
   try {
-    const res = await fetch(`${BASE_URL}/ai/analyze-inspection`, {
+    const res = await fetch(`${BASE_URL}/nosql/ai/inspection`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(inspectionData)
@@ -79,6 +79,15 @@ export const submitDigitalInspection = async (inspectionData) => {
         : `${prod} inventory status is healthy. Standard sales distribution schedule applies (${shelfLife} days shelf life remaining).`,
       createdAt: new Date().toISOString()
     };
+  }
+};
+
+export const getInspectionHistory = async () => {
+  try {
+    const res = await fetch(`${BASE_URL}/nosql/ai/inspections`);
+    return await handleResponse(res);
+  } catch (err) {
+    return [];
   }
 };
 
